@@ -24,11 +24,71 @@
 
 ;;; Code:
 
-(defun inferior-python-mode-helper--init ())
+(defvar inferior-python-mode-helper--mname "_cmd")
 
-(defun inferior-python-mode-helper--input-filter ())
+(defun inferior-python-mode-helper--init ()
+  (setq-local python-shell-setup-codes '("from _cmd import _cmd\n"))
+  (add-hook 'comint-input-filter-functions #'inferior-python-mode-helper--input-filter 0 t)
+  (add-hook 'comint-preoutput-filter-functions #'inferior-python-mode-helper--preoutput-filter 0 t))
 
-(defun inferior-python-mode-helper--output-filter ())
+(defun inferior-python-mode-helper--input-filter (input)
+  (let ((read-buffer-completion-ignore-case t))
+    (pcase (string-trim input (rx (+ (in ";" cntrl blank))) (rx (+ (in ";" cntrl blank))))
+      ((and (pred (string-match (rx (seq bos
+					 inferior-python-mode-helper--mname
+					 (* (in cntrl blank)) "." (* (in cntrl blank))
+					 (group (or "cd" "cd_b" "pwd"))
+					 eos))))
+	    (app (match-string 1) cmd))
+       (pcase cmd
+	 ("pwd" (concat inferior-python-mode-helper--mname "._pwd()"))
+	 ("cd" (concat inferior-python-mode-helper--mname
+		       (format "._chdir(path='%s', cmd='cd')"
+			       (expand-file-name
+				(read-directory-name
+				 "Change working directory: "
+				 default-directory default-directory t)))))
+	 ("cd_b" (concat
+		  inferior-python-mode-helper--mname
+		  (format "._chdir(path='%s', cmd='cd_b')"
+			  (expand-file-name
+			   (buffer-local-value
+			    'default-directory
+			    (get-buffer (read-buffer
+					 "Change to Buffer’s directory: " nil t
+					 #'(lambda (b)
+					     (let ((bn (if (consp b) (car b) b)))
+					       (and (null
+						     (string-match (rx (seq bol (in " " "*"))) bn))
+						    (not (null
+							  (buffer-local-value
+							   'default-directory
+							   (get-buffer bn))))))))))))))))
+      (otherwise input))))
+
+(defun inferior-python-mode-helper--preoutput-filter (output)
+  (let ((command-effect
+	 (string-match (rx (seq bos
+				(concat inferior-python-mode-helper--mname "_output_start_")
+				(group (* anything))
+				(concat inferior-python-mode-helper--mname "_output_end_")
+				eos))
+		       output)))
+    (if command-effect
+	(inferior-python-mode-helper--preoutput-effects
+	 (with-temp-buffer (insert (match-string 1 output))
+			   (goto-char (point-max))
+			   (eval-last-sexp t)))
+      output)))
+
+(defun inferior-python-mode-helper--preoutput-effects (pl)
+  (let ((cmd (plist-get pl 'command))
+	(data (plist-get pl 'data))
+	(result (plist-get pl 'result)))
+    (pcase cmd
+      ((rx (seq bol (or "cd" "cd_b" "pwd") eol))
+       (cd-absolute data)))
+    result))
 
 (provide 'inferior-python-mode-helper)
 ;;; inferior-python-mode-helper.el ends here
