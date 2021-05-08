@@ -24,21 +24,25 @@
 
 ;;; Code:
 
-(defvar inferior-python-mode-helper--mname "_cmd")
+(defvar inferior-python-mode-helper--mname "inferior-python-mode-helper-temp-id")
 
 (defun inferior-python-mode-helper--init ()
-  (setq-local python-shell-setup-codes '("from _cmd import _cmd\n"))
+  (add-to-list (make-local-variable 'python-shell-setup-codes)
+	       "
+##########################################
+#include <inferior-python-mode-helper.py>#
+##########################################")
   (add-hook 'comint-input-filter-functions #'inferior-python-mode-helper--input-filter 0 t)
   (add-hook 'comint-preoutput-filter-functions #'inferior-python-mode-helper--preoutput-filter 0 t))
 
 (defun inferior-python-mode-helper--input-filter (input)
   (let ((read-buffer-completion-ignore-case t))
     (pcase (string-trim input (rx (+ (in ";" cntrl blank))) (rx (+ (in ";" cntrl blank))))
-      ((and (pred (string-match (rx (seq bos
-					 inferior-python-mode-helper--mname
-					 (* (in cntrl blank)) "." (* (in cntrl blank))
-					 (group (or "cd" "cd_b" "pwd"))
-					 eos))))
+      ((and (pred (string-match (eval `(rx (seq bos
+						,inferior-python-mode-helper--mname
+						(* (in cntrl blank)) "." (* (in cntrl blank))
+						(group (or "cd" "cd_b" "pwd"))
+						eos)))))
 	    (app (match-string 1) cmd))
        (pcase cmd
 	 ("pwd" (concat inferior-python-mode-helper--mname "._pwd()"))
@@ -59,20 +63,21 @@
 					 #'(lambda (b)
 					     (let ((bn (if (consp b) (car b) b)))
 					       (and (null
-						     (string-match (rx (seq bol (in " " "*"))) bn))
+						     (string-match (rx (seq bol (in " " "*")))
+								   bn))
 						    (not (null
 							  (buffer-local-value
 							   'default-directory
 							   (get-buffer bn))))))))))))))))
-      (otherwise input))))
+      (_ input))))
 
 (defun inferior-python-mode-helper--preoutput-filter (output)
   (let ((command-effect
-	 (string-match (rx (seq bos
-				(concat inferior-python-mode-helper--mname "_output_start_")
-				(group (* anything))
-				(concat inferior-python-mode-helper--mname "_output_end_")
-				eos))
+	 (string-match (eval `(rx (seq bos
+				       ,(concat "_" inferior-python-mode-helper--mname "_output_start_")
+				       (group (* anything))
+				       ,(concat "_" inferior-python-mode-helper--mname "_output_end_")
+				       eos)))
 		       output)))
     (if command-effect
 	(inferior-python-mode-helper--preoutput-effects
