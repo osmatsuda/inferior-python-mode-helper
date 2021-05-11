@@ -88,9 +88,18 @@
 		      (insert "\n"))))
 		(forward-line)
 		(push-mark)
-		(end-of-line)))))))
+		(end-of-line))))
+	  (delete-char -1))))
 
-    ;; save and byte-compile
+    ;; final process
     (save-buffer)
-    (mapc #'kill-buffer (list src-py-buf target-buf (current-buffer)))
-    (byte-compile-file target)))
+    ;(mapc #'kill-buffer (list src-py-buf target-buf (current-buffer)))
+    (byte-compile-file target)
+    (when ins-dir
+      (unless (directory-name-p ins-dir)
+	(setq ins-dir (concat ins-dir "/")))
+      (unless (file-directory-p ins-dir)
+	(make-directory ins-dir t))
+      (mapc #'(lambda (file)
+		(copy-file file ins-dir 1 t))
+	    (list target (concat target "c"))))))
