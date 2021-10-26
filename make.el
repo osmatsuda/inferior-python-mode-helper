@@ -1,5 +1,5 @@
 ;;; make.el ---                                      -*- lexical-binding: t; -*-
-;;
+;; 
 ;;
 
 (let* (;; Configures:
@@ -13,7 +13,8 @@
        ;;   to your library directory.
        (ins-dir nil)
 
-
+       ;;
+       ;;
        (tmp-id "inferior-python-mode-helper-temp-id")
        (src-el "inferior-python-mode-helper.el")
        (src-py-buf (find-file-noselect "inferior-python-mode-helper.py"))
