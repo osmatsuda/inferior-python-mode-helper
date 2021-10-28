@@ -24,12 +24,19 @@
 
 ;;; Code:
 
-(defconst inferior-python-mode-helper--mname "inferior-python-mode-helper-temp-id")
+(defconst inferior-python-mode-helper--mname
+  "#######################################
+   #                                     #
+   # inferior-python-mode-helper-temp-id #
+   #                                     #
+   #######################################")
 
 (defconst inferior-python-mode-helper--pycode "
-##########################################
-#include <inferior-python-mode-helper.py>#
-##########################################")
+###############################################
+#                                             #
+#'((include . inferior-python-mode-helper.py))#
+#                                             #
+###############################################")
 
 (defvar inferior-python-mode-helper--sender nil)
 

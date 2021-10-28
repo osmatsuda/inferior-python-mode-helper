@@ -4,7 +4,7 @@
 
 (defun comment-box-search-forward (&optional line-elem bound eval-as-string)
   "Search rectangle made by comment symbols. Then evaluate the contents.
-Return a list like '((start . end) (width . height) content)"
+Return a a-list like '(beginning end width height content)"
   (unless line-elem (if (and (stringp comment-start)
 			     (> (length comment-start) 0))
 			(setq line-elem comment-start)
@@ -35,11 +35,14 @@ Return a list like '((start . end) (width . height) content)"
 	(setq content (concat content (match-string 1 line) "\n")))
       (rectangle-next-line))
     (goto-char rect-end)
-    (list (cons rect-start rect-end) rect-size
-	  (if eval-as-string
-	      (string-trim content)
-	    (with-temp-buffer
-	      (insert content)
-	      (eval-last-sexp t))))))
+    (list (cons 'beginning rect-start)
+	  (cons 'end rect-end)
+	  (cons 'width (car rect-size))
+	  (cons 'height (cdr rect-size))
+	  (cons 'content (if eval-as-string
+			     (string-trim content)
+			   (with-temp-buffer
+			     (insert content)
+			     (eval-last-sexp t)))))))
 
 (provide 'comment-box-search-forward)
