@@ -43,3 +43,4 @@ class inferior_python_mode_helper:
         print(o)
 
 __main__.__dict__[inferior_python_mode_helper._identifier()] = inferior_python_mode_helper()
+print(f'loaded "{inferior_python_mode_helper._identifier()}"')
