@@ -3,16 +3,12 @@
 ;;
 
 (let* (;; Configures:
+       ;;
+       ;;
+       ;; Default module name of the helper command
+       (module-name "_el")
+
        ;; 
-       ;; id: top-level name of the helper command
-       (id "_cmd")
-
-       ;; ins-dir: install directory
-       ;;   When this value is nil, you should copy a built file (
-       ;;   build/inferior-python-mode-helper.el or build/inferior-python-mode-helper.elc)
-       ;;   to your library directory.
-       (ins-dir nil)
-
        ;;
        ;;
        ;; 
@@ -27,6 +23,10 @@
 		  (dir (make-directory dir) dir))
 		"/" src-el))
        target-buf)
+  (let ((_module-name (read-from-minibuffer
+		       (concat "Set a module name [default: " module-name "]: "))))
+    (unless (string-empty-p _module-name)
+      (setq module-name _module-name)))
   ;; setup target file
   (when (file-exists-p target)
     (delete-file target))
@@ -36,12 +36,12 @@
   (load (concat default-directory "comment-box-search-forward.el"))
   (with-current-buffer target-buf
 
-    ;; setup inferior-python-mode-helper--mname with `id`
+    ;; setup inferior-python-mode-helper--mname with `module-name`
     (goto-char (point-min))
     (let-alist (comment-box-search-forward "#" nil t)
       (when (string= .content tmp-id)
 	(delete-region .beginning .end)
-	(insert id)))
+	(insert module-name)))
 
     ;; insert python-source from `src-py`
     (let-alist (comment-box-search-forward "#")
@@ -56,7 +56,7 @@
 	  (when (> (length line) 0)
 	    (when (string-match (eval `(rx (seq symbol-start ,tmp-id symbol-end)))
 				line)
-	      (setq line (replace-match id t t line)))
+	      (setq line (replace-match module-name t t line)))
 	    (with-current-buffer target-buf
 	      (insert (format "%S" line))
 	      (delete-char -1)
@@ -71,12 +71,5 @@
     ;; final process
     (save-buffer))
   (mapc #'kill-buffer (list src-py-buf target-buf))
-  (byte-compile-file target)
-  (when ins-dir
-    (unless (directory-name-p ins-dir)
-      (setq ins-dir (concat ins-dir "/")))
-    (unless (file-directory-p ins-dir)
-      (make-directory ins-dir t))
-    (mapc #'(lambda (file)
-	      (copy-file file ins-dir 1 t))
-	  (list target (concat target "c")))))
+  (byte-compile-file target))
+

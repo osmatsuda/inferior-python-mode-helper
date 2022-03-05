@@ -57,8 +57,6 @@ class inferior_python_mode_helper:
 
     @staticmethod
     def _raw_command_output(cmd, data=None, result=None):
-        log = open('inferior_python_mode_helper.log', 'a')
-        log.write(f'cmd: {cmd}\ndata: {data}\nresult: {result}\n')
         id = inferior_python_mode_helper._identifier()
         o = f'_{id}_output_beg_\'(command "{cmd}"'
         if data is not None:
@@ -74,25 +72,6 @@ class inferior_python_mode_helper:
             o = o[:-1] + ']'
             
         o += f')_{id}_output_end_'
-        log.write(o + '\n\n')
-        log.close()
-        print(o)
-
-    @staticmethod
-    def _raw_command_output_t(cmd, data=None, result=None):
-        fd, path = tempfile.mkstemp(prefix='py', text=True)
-        id = inferior_python_mode_helper._identifier()
-        o = f'_{id}_output_beg_\'(command "{cmd}"'
-
-        if data is not None:
-            o += f' data "{data}"'
-
-        o += f' result "{path}")_{id}_output_end_'
-
-        if result is not None:
-            os.write(fd, result.encode('utf8'))
-
-        inferior_python_mode_helper._tmp_files.append((fd, path))
         print(o)
         
     @staticmethod
