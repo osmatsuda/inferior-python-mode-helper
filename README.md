@@ -13,8 +13,8 @@ Utilities for inferior-python-mode
 ```elisp
 (autoload 'inferior-python-mode-helper "inferior-python-mode-helper")
 (add-hook 'python-mode-hook
-          #'(lambda ()
-              (add-hook 'python-shell-first-prompt-hook #'inferior-python-mode-helper)))
+          (lambda ()
+            (add-hook 'python-shell-first-prompt-hook #'inferior-python-mode-helper)))
 ```
 
 ## Usage
