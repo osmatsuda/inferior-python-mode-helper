@@ -9,9 +9,13 @@ Utilities for inferior-python-mode
 3. `M-x load-file` and load the `make.el`
    - This script is setting a module name that used on the top level of the inferior-python-mode (defaults to `_el`), and merging the file `inferior-python-mode-helper.py` into the file `inferior-python-mode-helper.el`, and then executing `(byte-compile-file THAT-FILE)`.
 4. Move the built file `build/inferior-python-mode-helper.elc` to your library directory specified by the variable `load-path`.
-5. Add the followings to your initialization file:
-   - `(autoload 'inferior-python-mode-helper "inferior-python-mode-helper")`
-   - `(add-hook 'python-shell-first-prompt-hook #'inferior-python-mode-helper)`
+5. Add initialization code like followings:
+```elisp
+(autoload 'inferior-python-mode-helper "inferior-python-mode-helper")
+(add-hook 'python-mode-hook
+          #'(lambda ()
+              (add-hook 'python-shell-first-prompt-hook #'inferior-python-mode-helper)))
+```
 
 ## Usage
 
