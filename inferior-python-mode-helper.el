@@ -69,10 +69,10 @@
                   ,inferior-python-mode-helper--mname
                   "."
                   (group (or (seq (or "eval_expr"
-				      "open_b"
-				      "open_f")
-				  word-end)
-			     (or "write_b(")))))))
+                                      "open_b"
+                                      "open_f")
+                                  word-end)
+                             (or "write_b(")))))))
 
 
 (defun inferior-python-mode-helper--input-filter (input)
@@ -123,11 +123,11 @@
                       (s-str (concat (substring-no-properties input 0 (match-beginning 0))
                                      (inferior-python-mode-helper--expand-cmd (match-string 1 input)))))
                   (while (string-match inferior-python-mode-helper--rx-expr input start)
-		    (let ((memo-start (match-end 0)))
-		      (setq s-str (concat s-str
-					  (substring-no-properties input start (match-beginning 0))
-					  (inferior-python-mode-helper--expand-cmd (match-string 1 input))))
-		      (setq start memo-start)))
+                    (let ((memo-start (match-end 0)))
+                      (setq s-str (concat s-str
+                                          (substring-no-properties input start (match-beginning 0))
+                                          (inferior-python-mode-helper--expand-cmd (match-string 1 input))))
+                      (setq start memo-start)))
                   (setq s-str (concat s-str
                                       (substring-no-properties input start)
                                       "\n"))
@@ -144,7 +144,7 @@
     (let ((tmp-fname (python-shell--save-temp-file send-str)))
       #'(lambda (proc _)
           (comint-send-string
-	   proc
+           proc
            (format "__PYTHON_EL_eval_file('','%s',True)\n" tmp-fname))))))
 
 
@@ -168,8 +168,8 @@
           (read-buffer "Destination Buffer: " nil t
                            #'(lambda (b)
                                (let ((bn (if (consp b)
-					     (car b)
-					   b)))
+                                             (car b)
+                                           b)))
                                  (and (not (string-prefix-p " " bn))
                                       (not (string= (buffer-name) bn))
                                       (not (buffer-local-value 'buffer-read-only (get-buffer bn)))))))
@@ -182,7 +182,7 @@
                                       (if (or (string-prefix-p "#" fn)
                                               (file-symlink-p fn))
                                           nil
-					fn))))
+                                        fn))))
         (mode (completing-read "Mode (default r): "
                                '("r" "rb" "w" "wb" "a" "ab") nil t nil nil "r")))
     (when (file-directory-p filename)
@@ -192,7 +192,7 @@
                (file-exists-p filename))
       (let ((yn ""))
         (while (not (or (string= yn "Y")
-			(string= yn "n")))
+                        (string= yn "n")))
           (setq yn (read-from-minibuffer
                     (concat filename "exists. Mode " mode " will truncate the file. Continue? [Y/n]: "))))
         (when (string= yn "n")
@@ -204,20 +204,20 @@
 (defun inferior-python-mode-helper--expand-open_b ()
   (let* ((contents (with-current-buffer
                        (read-buffer "Source Buffer: " nil t
-				    #'(lambda (b)
-					(let ((bn (if (consp b)
-						      (car b)
-						    b)))
-					  (and (not (string-prefix-p " " bn))
+                                    #'(lambda (b)
+                                        (let ((bn (if (consp b)
+                                                      (car b)
+                                                    b)))
+                                          (and (not (string-prefix-p " " bn))
                                                (not (eq (buffer-local-value 'major-mode (get-buffer bn))
-							'dired-mode))))))
+                                                        'dired-mode))))))
                      (buffer-substring-no-properties (point-min) (point-max))))
          (tmp-fname (when (>= (string-bytes contents) 1024)
                       (python-shell--save-temp-file contents)))
          (send-str (when (null tmp-fname)
                      (let ((iostrio (concat "io.StringIO("
                                             (string-join (split-string (format "%S" contents)"\n")
-							 "\\n")
+                                                         "\\n")
                                             ")")))
                        (when (< (string-bytes iostrio) 1024)
                          iostrio)))))
@@ -225,7 +225,7 @@
         (concat inferior-python-mode-helper--mname
                 "."
                 (format "_open_tmp(%S)"
-			(or tmp-fname (python-shell--save-temp-file contents)))))))
+                        (or tmp-fname (python-shell--save-temp-file contents)))))))
 
 
 (defun inferior-python-mode-helper--expand-eval_expr ()
@@ -350,10 +350,10 @@
                             (t (cons-items cdr-itm))))))
 
        (record-items (stock rec index+1)
-		     (if (= index+1 0)
-			 stock
-		       (setq stock (cons (str (aref rec (1- index+1))) stock))
-		       (record-items stock rec (1- index+1))))
+                     (if (= index+1 0)
+                         stock
+                       (setq stock (cons (str (aref rec (1- index+1))) stock))
+                       (record-items stock rec (1- index+1))))
        
        (str (expr &optional top-level)
             (cond ((booleanp expr)
@@ -379,10 +379,10 @@
                    (concat "["
                            (mapconcat #'identity (cons-items expr) ",")
                            "]"))
-		  ((recordp expr)
-		   (concat "["
-			   (mapconcat #'identity (record-items nil expr (length expr)) ",")
-			   "]"))
+                  ((recordp expr)
+                   (concat "["
+                           (mapconcat #'identity (record-items nil expr (length expr)) ",")
+                           "]"))
                   ((hash-table-p expr)
                    (concat "{"
                            (mapconcat #'identity
@@ -394,7 +394,7 @@
                                                   :initial-value nil))
                                       ",")
                            "}"))
-		  ((char-table-p expr)
+                  ((char-table-p expr)
                    (concat "{"
                            (mapconcat #'identity (chr-tbl-pairs expr) ",")
                            "}"))
@@ -418,19 +418,19 @@
   (eval `(rx (seq symbol-start
                   ,(concat "_" inferior-python-mode-helper--mname "_output_beg_")
                   (group (* anything))
-		  ,(concat "_" inferior-python-mode-helper--mname "_output_end_")
-		  "\n"
-		  (group (regexp python-shell-prompt-regexp))))))
+                  ,(concat "_" inferior-python-mode-helper--mname "_output_end_")
+                  "\n"
+                  (group (regexp python-shell-prompt-regexp))))))
 
 (defconst inferior-python-mode-helper--rx-cmdoutput-start
   (eval `(rx (seq symbol-start
-		  ,(concat "_" inferior-python-mode-helper--mname "_output_beg_'(")))))
+                  ,(concat "_" inferior-python-mode-helper--mname "_output_beg_'(")))))
 
 (defconst inferior-python-mode-helper--rx-cmdoutput-end
   (eval `(rx (seq (group (* anything))
-		  ,(concat "_" inferior-python-mode-helper--mname "_output_end_")
-		  "\n"
-		  (group (regexp python-shell-prompt-regexp))))))
+                  ,(concat "_" inferior-python-mode-helper--mname "_output_end_")
+                  "\n"
+                  (group (regexp python-shell-prompt-regexp))))))
 
 (defvar-local inferior-python-mode-helper--cmdoutput-end-sample nil)
 
@@ -441,100 +441,113 @@
     (setq inferior-python-mode-helper--default-sender nil))
 
   (let ((sample-length (length inferior-python-mode-helper--rx-cmdoutput-end))
-	(tmp-buffer-name (concat " *infpm preoutput <" (buffer-name) ">*"))
-	prefix
-	body
-	suffix)
+        (tmp-buffer-name (concat " *infpm preoutput <" (buffer-name) ">*"))
+        (proc-buffer (python-shell-get-buffer))
+        prefix
+        body
+        suffix)
     (cond
      ;; case: _output_beg_..._output_end_ >>>
      ((string-match inferior-python-mode-helper--rx-cmdoutput output)
 
       (with-current-buffer (get-buffer-create tmp-buffer-name)
-	(insert (match-string 1 output)))
+        (insert (match-string 1 output)))
       (setq prefix (substring output 0 (match-beginning 0))
-	    suffix (match-string 2 output)
-	    body (inferior-python-mode-helper--side-effects tmp-buffer-name))
+            suffix (match-string 2 output)
+            body (inferior-python-mode-helper--side-effects tmp-buffer-name
+                                                            :proc-buffer proc-buffer))
       (kill-buffer tmp-buffer-name))
 
      ;; case: _output_beg_...
      ((string-match inferior-python-mode-helper--rx-cmdoutput-start output)
       
       (let ((prefix-pair (format "'(prefix %S "
-				 (string-to-vector
-				  (substring output 0 (match-beginning 0)))))
-	    (body-part (substring output (match-end 0))))
-	(with-current-buffer (get-buffer-create tmp-buffer-name)
-	  (insert-before-markers prefix-pair body-part))
-	(setq inferior-python-mode-helper--cmdoutput-end-sample
-	      (substring body-part (- sample-length)))))
+                                 (string-to-vector
+                                  (substring output 0 (match-beginning 0)))))
+            (body-part (substring output (match-end 0))))
+        (with-current-buffer (get-buffer-create tmp-buffer-name)
+          (insert-before-markers prefix-pair body-part))
+        (setq inferior-python-mode-helper--cmdoutput-end-sample
+              (substring body-part (- sample-length)))))
 
      ;; case: ..._output_end_ >>>
      ((and inferior-python-mode-helper--cmdoutput-end-sample
-	   (string-match inferior-python-mode-helper--rx-cmdoutput-end output))
+           (string-match inferior-python-mode-helper--rx-cmdoutput-end output))
       
       (with-current-buffer tmp-buffer-name
-	(insert-before-markers output))
+        (insert-before-markers output))
       (setq inferior-python-mode-helper--cmdoutput-end-sample nil
-	    prefix (inferior-python-mode-helper--preoutput-prefix tmp-buffer-name)
-	    suffix (match-string 2 output)
-	    body (inferior-python-mode-helper--side-effects tmp-buffer-name))
+            prefix (inferior-python-mode-helper--preoutput-prefix tmp-buffer-name)
+            suffix (match-string 2 output)
+            body (inferior-python-mode-helper--side-effects tmp-buffer-name
+                                                            :proc-buffer proc-buffer))
       (kill-buffer tmp-buffer-name))
      
      ;; case: inside of _output_beg_..._output_end_
      ((and inferior-python-mode-helper--cmdoutput-end-sample
-	   (> (length output) sample-length))
+           (> (length output) sample-length))
       
       (with-current-buffer tmp-buffer-name
-	(insert-before-markers output))
+        (insert-before-markers output))
       (setq inferior-python-mode-helper--cmdoutput-end-sample
-	    (substring output (- sample-length))))
+            (substring output (- sample-length))))
 
      ;; case: flushed the rest of the end tag
      ((and inferior-python-mode-helper--cmdoutput-end-sample
-	   (string-match inferior-python-mode-helper--rx-cmdoutput-end
-			 (concat inferior-python-mode-helper--cmdoutput-end-sample
-				 output)))
+           (string-match inferior-python-mode-helper--rx-cmdoutput-end
+                         (concat inferior-python-mode-helper--cmdoutput-end-sample
+                                 output)))
 
       (with-current-buffer tmp-buffer-name
-	(insert-before-markers output))
+        (insert-before-markers output))
       (let ((searched (concat inferior-python-mode-helper--cmdoutput-end-sample
-			      output)))
-	(setq inferior-python-mode-helper--cmdoutput-end-sample nil
-	      prefix (inferior-python-mode-helper--preoutput-prefix tmp-buffer-name)
-	      suffix (match-string 2 searched)
-	      body (inferior-python-mode-helper--side-effects tmp-buffer-name)))
+                              output)))
+        (setq inferior-python-mode-helper--cmdoutput-end-sample nil
+              prefix (inferior-python-mode-helper--preoutput-prefix tmp-buffer-name)
+              suffix (match-string 2 searched)
+              body (inferior-python-mode-helper--side-effects tmp-buffer-name
+                                                              :proc-buffer proc-buffer)))
       (kill-buffer tmp-buffer-name)))
     
     (if (or prefix body suffix)
-	(concat prefix body suffix)
+        (concat prefix body suffix)
       (if inferior-python-mode-helper--cmdoutput-end-sample
-	  ""
-	output))))
+          ""
+        output))))
 
 
-(defun inferior-python-mode-helper--side-effects (buffername)
-  (let (outputs)
+(defun inferior-python-mode-helper--side-effects (buffername &rest kwargs)
+  "Because KWARGS is used for additional properties in the --side-effects-main function,
+KWARGS should be a property list."
+  (let (outputs
+        props)
     (with-current-buffer buffername
       (goto-char (point-min))
       (forward-sexp)
-      (setq outputs (cons (inferior-python-mode-helper--side-effects-main (eval-last-sexp t))
-			  outputs))
+      (setq props (eval-last-sexp t))
+      (unless (null kwargs)
+        (setq props (apply #'plist-put props kwargs)))
+      (setq outputs (cons (inferior-python-mode-helper--side-effects-main props)
+                          outputs))
       (while (re-search-forward inferior-python-mode-helper--rx-cmdoutput-start nil t)
-	(backward-char 2)
-	(forward-sexp)
-	(setq outputs (cons (inferior-python-mode-helper--side-effects-main (eval-last-sexp t))
-			    outputs))))
+        (backward-char 2)
+        (forward-sexp)
+        (setq props (eval-last-sexp t))
+        (unless (null kwargs)
+          (setq props (apply #'plist-put props kwargs)))
+        (setq outputs (cons (inferior-python-mode-helper--side-effects-main props)
+                            outputs))))
     (cl-reduce #'(lambda (accm str)
-		   (if (= (length str) 0)
-		       accm
-		     (concat str accm)))
-	       outputs :initial-value "")))
+                   (if (= (length str) 0)
+                       accm
+                     (concat str accm)))
+               outputs :initial-value "")))
 
 
-(defun inferior-python-mode-helper--side-effects-main (plst)
-  (let ((cmd (plist-get plst 'command))
-        (data (plist-get plst 'data))
-        (result (plist-get plst 'result)))
+(defun inferior-python-mode-helper--side-effects-main (props)
+  (let ((cmd (plist-get props 'command))
+        (data (plist-get props 'data))
+        (result (plist-get props 'result)))
     (setq result
           (if (arrayp result)
               (concat result)
@@ -543,18 +556,19 @@
     (cond
      ((member cmd '("cd" "cd_b" "pwd"))
       (unless (null result)
-	(setq result (concat result "\n")))
-      (cd-absolute data))
+        (setq result (concat result "\n")))
+      (with-current-buffer (plist-get props :proc-buffer)
+        (cd-absolute data)))
      
      ((string-match "^write_b\\[\\([ 0-9]*\\)]$" cmd)
       (if (get-buffer data)
-	  (with-current-buffer data
-	    (insert-before-markers
-	     result
-	     (unless (null result)
-	       (concat (mapcar #'string-to-number (split-string (match-string 1 cmd))))))
-	    (setq result nil))
-	(setq result (concat "### No buffer named " data)))))
+          (with-current-buffer data
+            (insert-before-markers
+             result
+             (unless (null result)
+               (concat (mapcar #'string-to-number (split-string (match-string 1 cmd))))))
+            (setq result nil))
+        (setq result (concat "### No buffer named " data)))))
     
     (if (null result)
         ""
@@ -564,11 +578,11 @@
 (defun inferior-python-mode-helper--preoutput-prefix (buffername)
   (with-current-buffer buffername
     (let (plst
-	  eval-point)
+          eval-point)
       (goto-char (point-min))
       (forward-sexp)
       (setq eval-point (point)
-	    plst (eval-last-sexp t))
+            plst (eval-last-sexp t))
       (delete-region eval-point (point))
       (plist-get plst 'prefix))))
 
